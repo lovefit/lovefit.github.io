@@ -307,11 +307,8 @@
             }
             else{
                 _html += "<b>" + value + "</b>";
-                if(value.indexOf("qq.com")==-1){
-	                $("#Frm_Main").attr("src","http://vip.wanwantv.com/yunparse/?url="+value);
-                }else{
-	                $("#Frm_Main").attr("src","http://www.avziliao.com/ydisk/qq.php?url="+value);
-                }
+		$("#Frm_Main").attr("src","http://dy.jiuli8.com/yunparse/index.php?url="+value);
+
                 $('#code').center();
     	        $('#goodcover').show();
     	        $('#code').fadeIn();
