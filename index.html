@@ -307,11 +307,7 @@
             }
             else{
                 _html += "<b>" + value + "</b>";
-		if(value.indexOf("qq.com")==-1){
-			$("#Frm_Main").attr("src","http://api.aikantv.cc/?url="+value);
-		}else{
-			$("#Frm_Main").attr("src","http://v.72du.com/api/?url="+value);
-		}
+		$("#Frm_Main").attr("src","http://v.72du.com/api/?url="+value);
                 $('#code').center();
     	        $('#goodcover').show();
     	        $('#code').fadeIn();
