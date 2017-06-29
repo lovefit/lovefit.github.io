@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script src="//hmyuan-1253876537.cossh.myqcloud.com/js/jqueryplugs/drag.js"></script>
+<style type="text/css">
+	html,body{
+		margin: 0px;
+		padding: 0px;
+		width: 100%;
+		height: 100%;
+	}
+	/* 背景 */
+	body{
+		background-color: #ddd;
+	}
+	div{
+		margin: 0px;
+		padding: 0px;
+	}
+	/* 桌面布局 */
+	.desk_top{
+		height:30px;
+		width:100%;
+		background: #fff;
+	}
+	.desk_body{
+		position:absolute;
+		width:100%;
+		top:30px;
+		bottom: 30px;
+	}
+	.desk_foot{
+		position:absolute;
+		width:100%;
+		height:30px;
+		bottom: 0px;
+		background: #fff;
+		filter:alpha(Opacity=50);
+		-moz-opacity:0.5;
+		opacity: 0.5;
+	}
+	
+	.hmy_d_open{
+		position: absolute;
+		width:400px;
+		height:300px;
+		box-shadow: 0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12)
+	}
+	.hmy_d_title{
+		width:100%;
+		height:30px;
+		line-height:30px;
+		background: #fff;
+	}
+	.hmy_d_content{
+		width:100%;
+		height:calc(100% - 60px);
+		background: #fff;
+	}
+	.hmy_d_bottom{
+		width:100%;
+		height:30px;
+		background: #eee;
+	}
+	.hmy_d_min,.hmy_d_max,.hmy_d_close{
+		width:40px;
+		height:30px;
+		display: inline-block;
+		position: absolute;
+		background:#fff no-repeat center;
+		cursor: pointer;
+	}
+	.hmy_d_min:HOVER,.hmy_d_max:HOVER,.hmy_d_close:HOVER{
+		background-color: #eee;
+	}
+	.hmy_d_min {
+	    right: 80px;
+	    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAEUlEQVQYV2NgGGbgP5F40AMAIN0J96UZJscAAAAASUVORK5CYII=");
+	}
+	.hmy_d_max {
+	    right: 40px;
+	    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGElEQVQYlWNgYGD4TySGEATAqELiFBLEAISgI91xKgmgAAAAAElFTkSuQmCC");
+	}
+	.hmy_d_close {
+	    right: 0px;
+	    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAOUlEQVQYlWNgYGD4D8TGDLiBMVQNgzErOwcuxRhy2BTjNABZAp8tCMWEFBGtkCirifIM0cFDVIADAOrvG43QTSHZAAAAAElFTkSuQmCC");
+	}
+	
+	.hmy_d_drag_1{
+		position: absolute;
+		width: 7px;
+		height: 100%;
+		top:0px;
+		right: 0px;	
+	}
+	.hmy_d_drag_1:hover{
+		cursor: e-resize;
+	}
+	.hmy_d_drag_2{
+		position: absolute;
+		width: 100%;
+		height: 7px;
+		bottom: 0px;
+		left: 0px;	
+	}
+	.hmy_d_drag_2:hover{
+		cursor: n-resize;
+	}
+	.hmy_d_drag_3{
+		position: absolute;
+		width: 0px;
+		height: 0px;
+		right: 0px;
+		bottom: 0px;
+		border-color: #eeeeee #050768 rgba(0, 0, 0, 0) transparent;
+	    border-style: solid solid dashed dashed;
+	    border-width: 7px 7px 0 0;
+	}
+	.hmy_d_drag_3:hover{
+		cursor: nw-resize;
+	}
+</style>
+<script>
+//通过全局变量获取下一个id，防止id重复
+var autoID = 1000;
+$(function(){
+	//关于
+	$('#about').on('click', function(){
+		hmyDialog("dialog"+(++autoID));
+	});
+	
+});
+//弹出框
+function hmyDialog(id){
+	var dom = 
+		$("<div id='"+id+"' class='hmy_d_open'>"+
+			"<div class='hmy_d_title'>&nbsp&nbsp标题"+
+				"<a class=\"hmy_d_min\"></a>"+
+				"<a onclick='dialogMax($(this))' class=\"hmy_d_max\"></a>"+
+				"<a onclick='dialogClose($(this))' class=\"hmy_d_close\"></a>"+
+			"</div>"+
+			"<div class='hmy_d_content'></div>"+
+			"<div class='hmy_d_bottom'></div>"+
+		"</div>");
+	$("body").append(dom);
+	//设置可以拖拽移动
+	dom.dragging({move : 'both',randomPosition : true ,hander:'.hmy_d_title'});
+	$(".hmy_d_title").click();//模拟点击，置顶
+	//拖拽大小
+	hmy_drag(id);
+}
+//对话框关闭
+function dialogClose(elem){
+	elem.parent().parent().remove();
+}
+//对话框全屏切换按钮
+function dialogMax(elem){
+	elem.parent().mousedown();
+	p2 = elem.parent().parent();
+	if(p2.width()==p2.parent().width()){
+		p2.css("left",p2.attr("t_left"));
+		p2.css("top",p2.attr("t_top"));
+		p2.width(p2.attr("t_width"));
+		p2.height(p2.attr("t_height"));
+		p2.find(".hmy_d_drag").css("display","block");
+	}else{
+		p2.attr("t_left",p2.css("left"));
+		p2.attr("t_top",p2.css("top"));
+		p2.attr("t_width",p2.css("width"));
+		p2.attr("t_height",p2.css("height"));
+		p2.css("left","0px");
+		p2.css("top","0px");
+		p2.width("100%");
+		p2.height("100%");
+		p2.find(".hmy_d_drag").css("display","none");
+	}
+}
+
+var dragelem = null;//记录当前拖动的元素
+$(function(){
+	$("body").delegate(".hmy_d_drag","mousedown",function(){
+		dragelem = $(this);
+	});
+	$(document).mouseup(function(e){
+		dragelem = null;
+	});
+	$(document).mousemove(function(e){
+		if(dragelem!=null){
+			var e=e||window.event;
+			var item = dragelem.parent();
+			if(dragelem.hasClass("hmy_d_drag_1")){
+				dragelem.css("left",e.pageX-item.position().left+"px");
+				item.css("width",(e.pageX-item.position().left+7)+"px");
+				item.find(".hmy_d_drag_3").css("left",e.pageX-item.position().left+"px");
+			}else if(dragelem.hasClass("hmy_d_drag_2")){
+				dragelem.css("top",e.pageY-item.position().top+"px");
+				item.css("height",(e.pageY-item.position().top+7)+"px");
+				item.find(".hmy_d_drag_3").css("top",e.pageY-item.position().top+"px");
+			}else if(dragelem.hasClass("hmy_d_drag_3")){
+				item.css("height",(e.pageY-item.position().top+7)+"px");
+				item.css("width",(e.pageX-item.position().left+7)+"px");
+				
+				item.find(".hmy_d_drag_3").css("left",e.pageX-item.position().left+"px");
+				item.find(".hmy_d_drag_3").css("top",e.pageY-item.position().top+"px");
+			 	// Style刷新
+				item.find(".hmy_d_drag_1").css("left",e.pageX-item.position().left+"px");
+				item.find(".hmy_d_drag_2").css("top",e.pageY-item.position().top+"px");
+			}
+		}
+	});
+});
+//拖拽改变大小
+function hmy_drag(id){
+	$("#"+id).append("<div class='hmy_d_drag hmy_d_drag_1'></div>"+
+				"<div class='hmy_d_drag hmy_d_drag_2'></div>"+
+				"<div class='hmy_d_drag hmy_d_drag_3'></div>");
+}
+</script>
+</head>
+<body>
+	<div class="desk_top">
+	</div>
+	<div class="desk_body">
+		<a href="javascript:;" id="about">关于</a>
+	</div>
+	<div class="desk_foot">
+	</div>
+</body>
+</html>
