@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script src="//hmyuan-1253876537.cossh.myqcloud.com/js/jqueryplugs/jquery-resize.js"></script>
 <script src="//hmyuan-1253876537.cossh.myqcloud.com/js/jqueryplugs/drag.js"></script>
 <style type="text/css">
 	html,body{
@@ -14,21 +15,17 @@
 	/* 背景 */
 	body{
 		background-color: #ddd;
+		background: url("http://kod.hmyuan.com/static/images/wall_page/1.jpg") no-repeat;
 	}
 	div{
 		margin: 0px;
 		padding: 0px;
 	}
 	/* 桌面布局 */
-	.desk_top{
-		height:30px;
-		width:100%;
-		background: #fff;
-	}
 	.desk_body{
 		position:absolute;
 		width:100%;
-		top:30px;
+		top:0px;
 		bottom: 30px;
 	}
 	.desk_foot{
@@ -110,44 +107,88 @@
 	}
 	.hmy_d_drag_3{
 		position: absolute;
-		width: 0px;
-		height: 0px;
+		width: 7px;
+		height: 7px;
 		right: 0px;
 		bottom: 0px;
-		border-color: rgba(0, 0, 0, 0) #050768 rgba(0, 0, 0, 0) transparent;
-	    border-style: solid solid dashed dashed;
-	    border-width: 7px 7px 0 0;
+		background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAABHSURBVHjajM7RCQAgCATQo8Edyxl0qgv7CArqFAQPHipIQnVEcEBUZtLdITeZGWtuoSe8UeUWqtxCx+kf2lCh9WMHVZ4CDADj7xFC8l50hgAAAABJRU5ErkJggg==) no-repeat;
+	    background-position:center;
 	}
 	.hmy_d_drag_3:hover{
 		cursor: nw-resize;
 	}
+	
+	.noselect {
+		-webkit-touch-callout: none; /* iOS Safari */
+		-webkit-user-select: none; /* Chrome/Safari/Opera */
+		-khtml-user-select: none; /* Konqueror */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+		user-select: none; /* Non-prefixed version, currently
+		not supported by any browser */
+	}
+</style>
+<style type="text/css">
+	
+.hmy_d_ico{
+	position:absolute;
+	display: inline-block;
+	width: 80px;
+	height: 90px;
+}
+.hmy_d_ico:HOVER {
+	background: rgba(255, 255, 255, 0.33);
+}
+.hmy_d_ico_active {
+	background: rgba(255, 255, 255, 0.40);
+}
+.hmy_d_ico_img{
+	height:calc(100% - 25px);
+	background: rgba(255, 200, 255, 0.33);
+}
+.hmy_d_ico_name{
+	height:25px;
+	text-align: center;
+	background: rgba(200, 255, 255, 0.33);
+}
 </style>
 <script>
 //通过全局变量获取下一个id，防止id重复
 var autoID = 1000;
-$(function(){
-	//关于
-	$('#about').on('click', function(){
-		hmyDialog("dialog"+(++autoID));
-	});
-	
-});
 //弹出框
-function hmyDialog(id){
+function hmyDialog(id,width,height){
+	var posX=100,posY=40,posorder=0;
+	$(".hmy_d_open").each(function(){
+		if($(this).css("z-index")==1){
+			var posX1 = $(this).position().left+40;
+			var posY1 = $(this).position().top+40;
+			console.log(posY1+"-"+height+"-"+$("body").height());
+			if((posX1+width)<=$(".desk_body").width()&&(posY1+height)<=$("body").height()){
+				posX = $(this).position().left+40;
+				posY = $(this).position().top+40;
+			}else{
+				posX = 100-(++posorder*20);
+				posY = 40+(++posorder*20);
+				if(posorder>5)posorder=0;
+			}
+		}
+	});
 	var dom = 
-		$("<div id='"+id+"' class='hmy_d_open'>"+
+		$("<div id='"+id+"' class='hmy_d_open' style='top:"+posY+"px;left:"+posX+"px;width:"+width+"px;height:"+height+"px;'>"+
 			"<div class='hmy_d_title'>&nbsp&nbsp标题"+
 				"<a class=\"hmy_d_min\"></a>"+
 				"<a onclick='dialogMax($(this))' class=\"hmy_d_max\"></a>"+
 				"<a onclick='dialogClose($(this))' class=\"hmy_d_close\"></a>"+
 			"</div>"+
-			"<div class='hmy_d_content'></div>"+
+			"<div class='hmy_d_content'>"+
+				"内容"+
+			"</div>"+
 			"<div class='hmy_d_bottom'></div>"+
 		"</div>");
 	$("body").append(dom);
 	//设置可以拖拽移动
-	dom.dragging({move : 'both',randomPosition : true ,hander:'.hmy_d_title'});
-	$(".hmy_d_title").click();//模拟点击，置顶
+	dom.dragging({move : 'both',randomPosition : false ,hander:'.hmy_d_title'});
+	dom.find(".hmy_d_title").click();//模拟点击，置顶
 	//拖拽大小
 	hmy_drag(id);
 }
@@ -182,31 +223,37 @@ var dragelem = null;//记录当前拖动的元素
 $(function(){
 	$("body").delegate(".hmy_d_drag","mousedown",function(){
 		dragelem = $(this);
+		$("body").addClass("noselect");//禁止鼠标选择事件
 	});
 	$(document).mouseup(function(e){
 		dragelem = null;
+		$("body").removeClass("noselect");//回复鼠标选择事件
 	});
 	$(document).mousemove(function(e){
 		if(dragelem!=null){
 			var e=e||window.event;
 			var item = dragelem.parent();
+			var setwith = e.pageX-item.position().left-2;
+			var setheight = e.pageY-item.position().top-2;
+			setwith = setwith>300?setwith:300;
+			setheight = setheight>200?setheight:200;
 			if(dragelem.hasClass("hmy_d_drag_1")){
-				dragelem.css("left",e.pageX-item.position().left+"px");
-				item.css("width",(e.pageX-item.position().left+7)+"px");
-				item.find(".hmy_d_drag_3").css("left",e.pageX-item.position().left+"px");
+				dragelem.css("left",setwith+"px");
+				item.css("width",(setwith+7)+"px");
+				item.find(".hmy_d_drag_3").css("left",setwith+"px");
 			}else if(dragelem.hasClass("hmy_d_drag_2")){
-				dragelem.css("top",e.pageY-item.position().top+"px");
-				item.css("height",(e.pageY-item.position().top+7)+"px");
-				item.find(".hmy_d_drag_3").css("top",e.pageY-item.position().top+"px");
+				dragelem.css("top",setheight+"px");
+				item.css("height",(setheight+7)+"px");
+				item.find(".hmy_d_drag_3").css("top",setheight+"px");
 			}else if(dragelem.hasClass("hmy_d_drag_3")){
-				item.css("height",(e.pageY-item.position().top+7)+"px");
-				item.css("width",(e.pageX-item.position().left+7)+"px");
+				item.css("height",(setheight+7)+"px");
+				item.css("width",(setwith+7)+"px");
 				
-				item.find(".hmy_d_drag_3").css("left",e.pageX-item.position().left+"px");
-				item.find(".hmy_d_drag_3").css("top",e.pageY-item.position().top+"px");
+				item.find(".hmy_d_drag_3").css("left",setwith+"px");
+				item.find(".hmy_d_drag_3").css("top",setheight+"px");
 			 	// Style刷新
-				item.find(".hmy_d_drag_1").css("left",e.pageX-item.position().left+"px");
-				item.find(".hmy_d_drag_2").css("top",e.pageY-item.position().top+"px");
+				item.find(".hmy_d_drag_1").css("left",setwith+"px");
+				item.find(".hmy_d_drag_2").css("top",setheight+"px");
 			}
 		}
 	});
@@ -218,12 +265,50 @@ function hmy_drag(id){
 				"<div class='hmy_d_drag hmy_d_drag_3'></div>");
 }
 </script>
+<script type="text/javascript">
+	$(function(){
+		hmy_d_ico_show(["111","222","333","444","555","666","777","888","888","888"]);
+		$(".desk_body").resize(function () {          //当浏览器大小变化时
+			hmy_d_ico_sort();
+		});
+		$(".hmy_d_ico").click(function(){
+			$(".hmy_d_ico").removeClass("hmy_d_ico_active");
+			$(this).addClass("hmy_d_ico_active");
+		});
+		$(".hmy_d_ico").dblclick(function(){
+			//双击弹出页面
+			hmyDialog("dialog"+(++autoID),400,300);
+		});
+		
+	});
+	function hmy_d_ico_show(hmy_d_icos){
+		for (var i = 0; i < hmy_d_icos.length; i++) {
+			$(".desk_body").append(
+				"<div class='hmy_d_ico'>"+
+					"<div class='hmy_d_ico_img'></div>"+
+					"<div class='hmy_d_ico_name'>"+hmy_d_icos[i]+"</div>"+
+				"</div>"
+			);
+		}
+		hmy_d_ico_sort();
+	}
+	function hmy_d_ico_sort(){
+		var hmy_d_ico_dom = $(".hmy_d_ico");
+		var left=0,top=0;
+		for (var i = 0; i < hmy_d_ico_dom.length; i++) {
+			$(hmy_d_ico_dom[i]).css("top",100*top+15)
+			$(hmy_d_ico_dom[i]).css("left",90*left+10)
+			if($(".desk_body").height()>(100*top+205)){
+				top++;
+			}else{
+				top=0;left++;
+			}
+		}
+	}
+</script>
 </head>
 <body>
-	<div class="desk_top">
-	</div>
 	<div class="desk_body">
-		<a href="javascript:;" id="about">关于</a>
 	</div>
 	<div class="desk_foot">
 	</div>
